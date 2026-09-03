@@ -1,0 +1,48 @@
+<div class="app-container min-vh-100 bg-light">
+    <!-- Main Top Navbar -->
+    <nav class="navbar navbar-expand navbar-dark bg-danger shadow-sm px-4" *ngIf="account">
+        <div class="container-fluid">
+            <!-- Brand Logo -->
+            <a routerLink="/" class="navbar-brand fw-bold fs-4 d-flex align-items-center me-4">
+                <i class="bi bi-bag-heart-fill me-2 fs-3"></i> kaonline
+            </a>
+
+            <!-- Navigation Links -->
+            <div class="navbar-nav me-auto">
+                <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item nav-link fw-semibold">
+                    <i class="bi bi-house-door me-1"></i> Home Marketplace
+                </a>
+                <a routerLink="/profile" routerLinkActive="active" class="nav-item nav-link fw-semibold">
+                    <i class="bi bi-person-circle me-1"></i> Profile
+                </a>
+                <a *ngIf="account.role === Role.Admin" routerLink="/admin" routerLinkActive="active" class="nav-item nav-link fw-semibold">
+                    <i class="bi bi-speedometer2 me-1"></i> Admin Portal
+                </a>
+            </div>
+
+            <!-- User Info & Logout -->
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-white text-danger px-3 py-2 rounded-pill fw-bold shadow-sm">
+                    <i class="bi bi-person-badge me-1"></i> {{account.role}}
+                </span>
+                <span class="text-white small d-none d-md-inline fw-semibold">
+                    {{account.firstName}} {{account.lastName}}
+                </span>
+                <button (click)="logout()" class="btn btn-outline-light btn-sm fw-bold">
+                    <i class="bi bi-box-arrow-right me-1"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Subnav Router Outlet -->
+    <router-outlet name="subnav"></router-outlet>
+
+    <!-- Global Alert Component -->
+    <div class="container mt-3">
+        <alert></alert>
+    </div>
+
+    <!-- Main Router Outlet -->
+    <router-outlet></router-outlet>
+</div>

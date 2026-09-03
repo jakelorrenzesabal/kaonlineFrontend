@@ -1,0 +1,299 @@
+<div class="container py-4">
+    <!-- Hero Banner -->
+    <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="fw-bold display-5 mb-2"><i class="bi bi-bag-check-fill me-2"></i>KaOnline Delivery</h1>
+                <p class="lead mb-0">Order delicious meals from top local restaurants delivered straight to your doorstep.</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <span class="badge bg-light text-dark px-3 py-2 fs-6 rounded-pill shadow-sm">
+                    <i class="bi bi-geo-alt-fill text-danger me-1"></i> Metro Manila
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills mb-4 gap-2 border-bottom pb-3">
+        <li class="nav-item">
+            <button class="nav-link" [class.active]="activeTab === 'browse'" (click)="activeTab = 'browse'">
+                <i class="bi bi-shop me-1"></i> Browse Restaurants
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" [class.active]="activeTab === 'orders'" (click)="activeTab = 'orders'">
+                <i class="bi bi-clock-history me-1"></i> My Orders ({{myOrders.length}})
+            </button>
+        </li>
+        <li class="nav-item" *ngIf="activeTrackingOrder">
+            <button class="nav-link text-danger" [class.active]="activeTab === 'track'" (click)="activeTab = 'track'">
+                <i class="bi bi-geo-fill me-1"></i> Track Live Delivery (#{{activeTrackingOrder.OrderId}})
+            </button>
+        </li>
+    </ul>
+
+    <!-- BROWSE RESTAURANTS & MENU TAB -->
+    <div *ngIf="activeTab === 'browse'">
+        <div class="row">
+            <!-- Left Side: Restaurants or Selected Restaurant Menu -->
+            <div class="col-lg-8 mb-4">
+                <!-- Back Button if inside menu -->
+                <div *ngIf="selectedRestaurant" class="mb-3 d-flex align-items-center justify-content-between">
+                    <button class="btn btn-outline-secondary btn-sm" (click)="selectedRestaurant = null">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Restaurants
+                    </button>
+                    <span class="badge bg-danger fs-6">{{selectedRestaurant.name}}</span>
+                </div>
+
+                <!-- Restaurants List -->
+                <div *ngIf="!selectedRestaurant">
+                    <h4 class="fw-bold mb-3">Popular Restaurants</h4>
+                    <div class="row g-4" *ngIf="restaurants.length > 0">
+                        <div class="col-md-6" *ngFor="let res of restaurants">
+                            <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden hover-shadow">
+                                <img [src]="res.imageUrl || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600'" class="card-img-top" style="height: 180px; object-fit: cover;" [alt]="res.name">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title fw-bold mb-0">{{res.name}}</h5>
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>{{res.rating}}</span>
+                                    </div>
+                                    <p class="badge bg-light text-secondary border me-1">{{res.cuisine}}</p>
+                                    <p class="card-text text-muted small mb-3">{{res.description}}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{res.address}}</small>
+                                        <button class="btn btn-danger btn-sm" (click)="selectRestaurant(res)">View Menu</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Restaurant Menu -->
+                <div *ngIf="selectedRestaurant">
+                    <!-- Category Pills -->
+                    <div class="d-flex gap-2 mb-3 overflow-auto pb-2">
+                        <button *ngFor="let cat of categories" class="btn btn-sm rounded-pill" [class.btn-danger]="selectedCategory === cat" [class.btn-outline-secondary]="selectedCategory !== cat" (click)="selectedCategory = cat">
+                            {{cat}}
+                        </button>
+                    </div>
+
+                    <!-- Menu Items Grid -->
+                    <div class="row g-3">
+                        <div class="col-md-6" *ngFor="let item of filteredMenuItems">
+                            <div class="card h-100 border-0 shadow-sm rounded-3">
+                                <div class="row g-0 align-items-center">
+                                    <div class="col-4">
+                                        <img [src]="item.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300'" class="img-fluid rounded-start h-100" style="object-fit: cover; min-height: 110px;" [alt]="item.name">
+                                    </div>
+                                    <div class="col-8">
+                                        <div class="card-body py-2 pe-3">
+                                            <h6 class="fw-bold mb-1">{{item.name}}</h6>
+                                            <p class="text-muted small mb-1 text-truncate">{{item.description}}</p>
+                                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                                <span class="fw-bold text-danger">₱{{item.price | number:'1.2-2'}}</span>
+                                                <button class="btn btn-outline-danger btn-sm rounded-circle px-2" (click)="addToCart(item)">
+                                                    <i class="bi bi-plus-lg"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Shopping Cart Drawer -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-3 sticky-top" style="top: 20px;">
+                    <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center py-3">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-cart3 me-2"></i> Your Order</h5>
+                        <button *ngIf="cart.length > 0" class="btn btn-sm btn-outline-light" (click)="clearCart()">Clear</button>
+                    </div>
+                    <div class="card-body">
+                        <div *ngIf="cart.length === 0" class="text-center py-4 text-muted">
+                            <i class="bi bi-cart-x display-4 d-block mb-2"></i>
+                            <p class="mb-0">Your cart is empty. Select items from a restaurant menu to get started!</p>
+                        </div>
+
+                        <div *ngIf="cart.length > 0">
+                            <div class="list-group list-group-flush mb-3">
+                                <div *ngFor="let item of cart" class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">{{item.menuItem.name}}</h6>
+                                        <small class="text-muted">₱{{item.menuItem.price | number:'1.2-2'}} each</small>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button class="btn btn-sm btn-outline-secondary px-2 py-0" (click)="removeFromCart(item.menuItem)">-</button>
+                                        <span class="fw-bold">{{item.quantity}}</span>
+                                        <button class="btn btn-sm btn-outline-secondary px-2 py-0" (click)="addToCart(item.menuItem)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-top pt-3 mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Subtotal</span>
+                                    <span class="fw-bold">₱{{cartTotal | number:'1.2-2'}}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Delivery Fee</span>
+                                    <span class="text-success fw-bold">FREE</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between fs-5 fw-bold text-danger">
+                                    <span>Total</span>
+                                    <span>₱{{cartTotal | number:'1.2-2'}}</span>
+                                </div>
+                            </div>
+
+                            <!-- Delivery & Payment Details Form -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Delivery Address</label>
+                                <input type="text" class="form-control form-control-sm" [(ngModel)]="deliveryAddress" placeholder="Enter delivery address">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Contact Phone</label>
+                                <input type="text" class="form-control form-control-sm" [(ngModel)]="contactPhone" placeholder="Mobile number">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Payment Method</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="paymentMethod">
+                                    <option value="Cash on Delivery">Cash on Delivery (COD)</option>
+                                    <option value="GCash / E-Wallet">GCash / E-Wallet</option>
+                                    <option value="Credit/Debit Card">Credit/Debit Card</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Notes / Instructions</label>
+                                <input type="text" class="form-control form-control-sm" [(ngModel)]="specialInstructions" placeholder="e.g. Extra napkins, call upon arrival">
+                            </div>
+
+                            <button class="btn btn-danger w-100 py-2 fw-bold" [disabled]="submittingOrder" (click)="placeOrder()">
+                                <span *ngIf="submittingOrder" class="spinner-border spinner-border-sm me-1"></span>
+                                Place Order Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MY ORDERS HISTORY TAB -->
+    <div *ngIf="activeTab === 'orders'">
+        <h4 class="fw-bold mb-3">Order History</h4>
+        <div *ngIf="myOrders.length === 0" class="alert alert-info">
+            You haven't placed any orders yet.
+        </div>
+        <div class="row g-3" *ngIf="myOrders.length > 0">
+            <div class="col-md-6" *ngFor="let order of myOrders">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Order #{{order.OrderId}}</span>
+                        <span class="badge" 
+                              [class.bg-warning]="order.status === 'Pending' || order.status === 'Preparing'"
+                              [class.bg-info]="order.status === 'Picked Up' || order.status === 'Out for Delivery'"
+                              [class.bg-success]="order.status === 'Delivered'">
+                            {{order.status}}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="fw-bold text-danger">{{order.Restaurant?.name}}</h6>
+                        <p class="small text-muted mb-2"><i class="bi bi-clock me-1"></i>{{order.created | date:'medium'}}</p>
+                        <ul class="list-unstyled small mb-3">
+                            <li *ngFor="let item of order.OrderItems">
+                                {{item.quantity}}x {{item.itemName}} - ₱{{item.price | number:'1.2-2'}}
+                            </li>
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <span class="fw-bold text-dark">Total: ₱{{order.totalAmount | number:'1.2-2'}}</span>
+                            <button class="btn btn-outline-danger btn-sm" (click)="trackOrder(order)">
+                                <i class="bi bi-geo-alt me-1"></i> Track Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIVE TRACKING SEQUENCE TAB -->
+    <div *ngIf="activeTab === 'track' && activeTrackingOrder">
+        <div class="card border-0 shadow-sm rounded-3 p-4">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">Live Delivery Tracker</h4>
+                    <span class="text-muted small">Order #{{activeTrackingOrder.OrderId}} from <strong>{{activeTrackingOrder.Restaurant?.name}}</strong></span>
+                </div>
+                <button class="btn btn-outline-danger btn-sm" (click)="refreshTracking()">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Refresh Status
+                </button>
+            </div>
+
+            <!-- Sequence Diagram Tracker Pipeline -->
+            <div class="mb-5">
+                <h6 class="text-uppercase text-muted fw-bold mb-3 small">Sequence Progress</h6>
+                <div class="position-relative m-4">
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-danger" [style.width.%]="(getOrderStepIndex(activeTrackingOrder.status) - 1) * 25"></div>
+                    </div>
+                    <div class="d-flex justify-content-between position-absolute top-0 start-0 w-100 translate-middle-y">
+                        <div class="text-center">
+                            <div class="rounded-circle btn btn-sm" [class.btn-danger]="getOrderStepIndex(activeTrackingOrder.status) >= 1" [class.btn-secondary]="getOrderStepIndex(activeTrackingOrder.status) < 1">1</div>
+                            <div class="small fw-bold mt-1">Order Placed</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="rounded-circle btn btn-sm" [class.btn-danger]="getOrderStepIndex(activeTrackingOrder.status) >= 2" [class.btn-secondary]="getOrderStepIndex(activeTrackingOrder.status) < 2">2</div>
+                            <div class="small fw-bold mt-1">Restaurant Confirmed</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="rounded-circle btn btn-sm" [class.btn-danger]="getOrderStepIndex(activeTrackingOrder.status) >= 3" [class.btn-secondary]="getOrderStepIndex(activeTrackingOrder.status) < 3">3</div>
+                            <div class="small fw-bold mt-1">Preparing Food</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="rounded-circle btn btn-sm" [class.btn-danger]="getOrderStepIndex(activeTrackingOrder.status) >= 4" [class.btn-secondary]="getOrderStepIndex(activeTrackingOrder.status) < 4">4</div>
+                            <div class="small fw-bold mt-1">Rider On The Way</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="rounded-circle btn btn-sm" [class.btn-danger]="getOrderStepIndex(activeTrackingOrder.status) >= 5" [class.btn-secondary]="getOrderStepIndex(activeTrackingOrder.status) < 5">5</div>
+                            <div class="small fw-bold mt-1">Delivered</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delivery Summary Cards -->
+            <div class="row g-3 mt-4">
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <h6 class="fw-bold text-muted mb-1"><i class="bi bi-credit-card me-1"></i> Payment</h6>
+                        <p class="mb-0 fw-bold text-dark">{{activeTrackingOrder.Payment?.paymentMethod}}</p>
+                        <small class="badge" [class.bg-success]="activeTrackingOrder.Payment?.paymentStatus === 'Completed'" [class.bg-warning]="activeTrackingOrder.Payment?.paymentStatus !== 'Completed'">
+                            {{activeTrackingOrder.Payment?.paymentStatus || 'Pending'}}
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <h6 class="fw-bold text-muted mb-1"><i class="bi bi-bicycle me-1"></i> Delivery Rider</h6>
+                        <p class="mb-0 fw-bold text-dark" *ngIf="activeTrackingOrder.Rider">
+                            {{activeTrackingOrder.Rider.firstName}} {{activeTrackingOrder.Rider.lastName}}
+                        </p>
+                        <p class="mb-0 text-muted italic small" *ngIf="!activeTrackingOrder.Rider">Assigning nearest rider...</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <h6 class="fw-bold text-muted mb-1"><i class="bi bi-geo-alt me-1"></i> Destination</h6>
+                        <p class="mb-0 small fw-bold text-dark">{{activeTrackingOrder.deliveryAddress}}</p>
+                        <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{activeTrackingOrder.contactPhone}}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

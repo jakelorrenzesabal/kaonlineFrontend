@@ -1,0 +1,111 @@
+<div class="p-4">
+    <div class="container">
+        <!-- Admin Banner -->
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="bi bi-shield-lock-fill text-danger me-2"></i>KaOnline Admin Dashboard</h2>
+                <p class="text-muted mb-0">System Overview, Revenue Analytics, Deliveries & Account Permissions</p>
+            </div>
+            <a routerLink="accounts" class="btn btn-outline-danger font-weight-bold">
+                <i class="bi bi-people-fill me-1"></i> Manage All Accounts
+            </a>
+        </div>
+
+        <!-- System KPI Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-3 p-3 bg-gradient bg-primary text-white">
+                    <h6 class="text-white-50 text-uppercase mb-1 small fw-bold">Total Platform Revenue</h6>
+                    <h3 class="fw-bold mb-0">₱{{totalRevenue | number:'1.2-2'}}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-3 p-3 bg-gradient bg-success text-white">
+                    <h6 class="text-white-50 text-uppercase mb-1 small fw-bold">Total Orders Placed</h6>
+                    <h3 class="fw-bold mb-0">{{orders.length}}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-3 p-3 bg-gradient bg-warning text-dark">
+                    <h6 class="text-dark-50 text-uppercase mb-1 small fw-bold">Registered Restaurants</h6>
+                    <h3 class="fw-bold mb-0">{{restaurants.length}}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-3 p-3 bg-gradient bg-dark text-white">
+                    <h6 class="text-white-50 text-uppercase mb-1 small fw-bold">Active Delivery Riders</h6>
+                    <h3 class="fw-bold mb-0">{{riders.length}}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Master Orders & Deliveries Log -->
+        <div class="card border-0 shadow-sm rounded-3 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0"><i class="bi bi-list-task me-2 text-danger"></i>System Master Orders & Delivery Pipeline</h5>
+                <button class="btn btn-sm btn-outline-secondary" (click)="loadAdminMetrics()">Refresh</button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Restaurant</th>
+                                <th>Total</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                                <th>Rider Assignment</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let order of orders">
+                                <td class="fw-bold">#{{order.OrderId}}</td>
+                                <td>
+                                    <strong class="d-block">{{order.Customer?.firstName}} {{order.Customer?.lastName}}</strong>
+                                    <small class="text-muted">{{order.contactPhone}}</small>
+                                </td>
+                                <td>{{order.Restaurant?.name}}</td>
+                                <td class="fw-bold text-danger">₱{{order.totalAmount | number:'1.2-2'}}</td>
+                                <td>
+                                    <small class="badge bg-light text-dark border">{{order.Payment?.paymentMethod}}</small>
+                                </td>
+                                <td>
+                                    <span class="badge" 
+                                          [class.bg-warning]="order.status === 'Pending' || order.status === 'Preparing'"
+                                          [class.bg-info]="order.status === 'Picked Up' || order.status === 'Out for Delivery'"
+                                          [class.bg-success]="order.status === 'Delivered'">
+                                        {{order.status}}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span *ngIf="order.Rider" class="badge bg-success">
+                                        <i class="bi bi-bicycle me-1"></i>{{order.Rider.firstName}} {{order.Rider.lastName}}
+                                    </span>
+                                    <select *ngIf="!order.Rider" class="form-select form-select-sm" #riderSelect (change)="assignRiderToOrder(order.OrderId!, riderSelect.value)">
+                                        <option value="">Assign Rider...</option>
+                                        <option *ngFor="let r of riders" [value]="r.AccountId">{{r.firstName}} {{r.lastName}}</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm" [value]="order.status" #statusSelect (change)="updateStatus(order.OrderId!, statusSelect.value)">
+                                        <option value="Pending">Pending</option>
+                                        <option value="Confirmed">Confirmed</option>
+                                        <option value="Preparing">Preparing</option>
+                                        <option value="Ready for Pickup">Ready for Pickup</option>
+                                        <option value="Picked Up">Picked Up</option>
+                                        <option value="Out for Delivery">Out for Delivery</option>
+                                        <option value="Delivered">Delivered</option>
+                                        <option value="Cancelled">Cancelled</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

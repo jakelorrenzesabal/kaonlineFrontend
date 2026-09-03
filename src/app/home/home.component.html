@@ -1,0 +1,36 @@
+<div>
+    <!-- Role View Selector Switcher Banner (For smooth testing & multi-actor demonstration) -->
+    <div class="bg-dark text-white py-2 px-3 border-bottom shadow-sm">
+        <div class="container d-flex justify-content-between align-items-center flex-wrap">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-danger">KAONLINE PORTAL SWITCHER</span>
+                <small class="text-light">Logged in as: <strong>{{account?.firstName}} {{account?.lastName}}</strong> ({{account?.role}})</small>
+            </div>
+            <div class="btn-group btn-group-sm mt-1 mt-md-0">
+                <button class="btn" [class.btn-danger]="activeRoleView === 'Customer' || activeRoleView === 'User'" [class.btn-outline-light]="activeRoleView !== 'Customer' && activeRoleView !== 'User'" (click)="switchRoleView('Customer')">
+                    <i class="bi bi-person me-1"></i> Customer Marketplace
+                </button>
+                <button class="btn" [class.btn-danger]="activeRoleView === 'Restaurant'" [class.btn-outline-light]="activeRoleView !== 'Restaurant'" (click)="switchRoleView('Restaurant')">
+                    <i class="bi bi-shop me-1"></i> Restaurant Portal
+                </button>
+                <button class="btn" [class.btn-danger]="activeRoleView === 'Rider'" [class.btn-outline-light]="activeRoleView !== 'Rider'" (click)="switchRoleView('Rider')">
+                    <i class="bi bi-bicycle me-1"></i> Rider Portal
+                </button>
+                <button *ngIf="account?.role === Role.Admin" class="btn" [class.btn-danger]="activeRoleView === 'Admin'" [class.btn-outline-light]="activeRoleView !== 'Admin'" (click)="switchRoleView('Admin')">
+                    <i class="bi bi-shield-check me-1"></i> Admin View
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Render Portal Components based on activeRoleView -->
+    <app-customer *ngIf="activeRoleView === 'Customer' || activeRoleView === 'User'"></app-customer>
+    <app-restaurant-portal *ngIf="activeRoleView === 'Restaurant'"></app-restaurant-portal>
+    <app-rider-portal *ngIf="activeRoleView === 'Rider'"></app-rider-portal>
+    <div *ngIf="activeRoleView === 'Admin'" class="p-3">
+        <div class="alert alert-info container my-3">
+            <i class="bi bi-info-circle me-2"></i> You are viewing as Admin. You can access full administrative settings via the navbar or switch to customer/restaurant/rider views above.
+        </div>
+        <app-customer></app-customer>
+    </div>
+</div>

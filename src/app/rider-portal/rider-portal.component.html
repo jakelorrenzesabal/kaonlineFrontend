@@ -1,0 +1,119 @@
+<div class="container py-4">
+    <!-- Rider Header Banner -->
+    <div class="p-4 mb-4 rounded-3 text-white shadow-sm" style="background: linear-gradient(135deg, #05c46b 0%, #0be881 100%);">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <span class="badge bg-dark mb-2">DELIVERY RIDER PORTAL</span>
+                <h2 class="fw-bold mb-1"><i class="bi bi-bicycle me-2"></i>Welcome, {{account?.firstName || 'Rider'}}!</h2>
+                <p class="mb-0 text-white-50 small">Manage your active order deliveries and accept new available requests.</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <span class="badge bg-dark px-3 py-2 fs-6 rounded-pill">
+                    ● RIDER ONLINE
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills mb-4 gap-2 border-bottom pb-3">
+        <li class="nav-item">
+            <button class="nav-link" [class.active]="activeTab === 'my-deliveries'" (click)="activeTab = 'my-deliveries'">
+                <i class="bi bi-box2-heart me-1"></i> My Active Deliveries ({{myDeliveries.length}})
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" [class.active]="activeTab === 'available'" (click)="activeTab = 'available'">
+                <i class="bi bi-search me-1"></i> Available Orders Queue ({{availableOrders.length}})
+            </button>
+        </li>
+    </ul>
+
+    <!-- MY DELIVERIES TAB -->
+    <div *ngIf="activeTab === 'my-deliveries'">
+        <h4 class="fw-bold mb-3">Assigned Deliveries</h4>
+        <div *ngIf="myDeliveries.length === 0" class="alert alert-info">
+            You currently have no active deliveries assigned. Switch to <strong>Available Orders Queue</strong> to accept an order!
+        </div>
+        <div class="row g-3" *ngIf="myDeliveries.length > 0">
+            <div class="col-md-6" *ngFor="let order of myDeliveries">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Order #{{order.OrderId}}</span>
+                        <span class="badge" 
+                              [class.bg-warning]="order.status === 'Picked Up'"
+                              [class.bg-info]="order.status === 'Out for Delivery'"
+                              [class.bg-success]="order.status === 'Delivered'">
+                            {{order.status}}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-success mb-1"><i class="bi bi-shop me-1"></i>Pickup: {{order.Restaurant?.name}}</h6>
+                            <small class="text-muted d-block"><i class="bi bi-geo-alt me-1"></i>{{order.Restaurant?.address}}</small>
+                            <small class="text-muted d-block"><i class="bi bi-telephone me-1"></i>{{order.Restaurant?.phone}}</small>
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-dark mb-1"><i class="bi bi-person me-1"></i>Deliver To: {{order.Customer?.firstName}} {{order.Customer?.lastName}}</h6>
+                            <small class="text-muted d-block"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{order.deliveryAddress}}</small>
+                            <small class="text-muted d-block"><i class="bi bi-telephone me-1"></i>{{order.contactPhone}}</small>
+                        </div>
+                        <div class="p-2 bg-light rounded mb-3">
+                            <div class="d-flex justify-content-between text-muted small">
+                                <span>Payment Method:</span>
+                                <span class="fw-bold text-dark">{{order.Payment?.paymentMethod}}</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted small">
+                                <span>Collect Amount:</span>
+                                <span class="fw-bold text-danger fs-6">₱{{order.totalAmount | number:'1.2-2'}}</span>
+                            </div>
+                        </div>
+
+                        <!-- Rider Sequence Action Buttons -->
+                        <div class="d-grid gap-2">
+                            <button *ngIf="order.status !== 'Out for Delivery' && order.status !== 'Delivered'" class="btn btn-info text-white fw-bold" (click)="updateDeliveryStatus(order.OrderId!, 'Out for Delivery')">
+                                <i class="bi bi-bicycle me-1"></i> Pick Up & Start Delivery
+                            </button>
+                            <button *ngIf="order.status === 'Out for Delivery'" class="btn btn-success fw-bold" (click)="updateDeliveryStatus(order.OrderId!, 'Delivered')">
+                                <i class="bi bi-check-circle-fill me-1"></i> Mark Delivered & Collect Cash
+                            </button>
+                            <div *ngIf="order.status === 'Delivered'" class="alert alert-success py-2 text-center mb-0 small fw-bold">
+                                <i class="bi bi-patch-check-fill me-1"></i> Delivery Completed!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AVAILABLE ORDERS QUEUE TAB -->
+    <div *ngIf="activeTab === 'available'">
+        <h4 class="fw-bold mb-3">Available Orders Ready For Pickup</h4>
+        <div *ngIf="availableOrders.length === 0" class="alert alert-info">
+            No orders currently waiting for rider acceptance.
+        </div>
+        <div class="row g-3" *ngIf="availableOrders.length > 0">
+            <div class="col-md-6" *ngFor="let order of availableOrders">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Order #{{order.OrderId}}</span>
+                        <span class="badge bg-warning text-dark">{{order.status}}</span>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="fw-bold text-danger">{{order.Restaurant?.name}}</h6>
+                        <p class="small text-muted mb-2"><i class="bi bi-geo-alt me-1"></i>From: {{order.Restaurant?.address}}</p>
+                        <p class="small text-muted mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>To: {{order.deliveryAddress}}</p>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <span class="fw-bold text-dark">Earning/Total: ₱{{order.totalAmount | number:'1.2-2'}}</span>
+                            <button class="btn btn-success btn-sm fw-bold" (click)="acceptOrder(order.OrderId!)">
+                                <i class="bi bi-plus-circle me-1"></i> Accept Delivery
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
