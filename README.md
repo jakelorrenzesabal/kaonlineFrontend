@@ -1,5 +1,12 @@
-# angular-15-signup-verification-boilerplate
+# KaOnline Frontend Client Application
 
-Angular 15 Auth Boilerplate - Sign Up with Verification, Login and Forgot Password
+Frontend Single-Page Application (SPA) for the **KaOnline Multi-Role Order Delivery System**, built with Angular 15, TypeScript, and Bootstrap 5.
 
-Documentation at https://jasonwatmore.com/angular-15-auth-boilerplate-sign-up-with-verification-login-and-forgot-password
+## Quick Start
+```bash
+npm install
+npm start
+```
+Runs at `http://localhost:4200`.
+
+For full system overview, UML diagrams, architecture, and credentials, please refer to the root [README.md](../README.md).

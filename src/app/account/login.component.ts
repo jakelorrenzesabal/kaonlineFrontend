@@ -1,4 +1,4 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
@@ -28,6 +28,19 @@ export class LoginComponent implements OnInit {
 
     // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
+
+    loginAsDemo(role: string): void {
+        let email = 'customer@kaonline.com';
+        if (role === 'Restaurant') email = 'restaurant@kaonline.com';
+        if (role === 'Rider') email = 'rider@kaonline.com';
+        if (role === 'Admin') email = 'admin@kaonline.com';
+
+        this.form.patchValue({
+            email: email,
+            password: 'Password123!'
+        });
+        this.onSubmit();
+    }
 
     onSubmit() {
         this.submitted = true;
